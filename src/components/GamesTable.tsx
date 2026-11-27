@@ -115,6 +115,7 @@ export default function GamesTable({
   const [activeVideo, setActiveVideo] = useState<Game | null>(null);
 
   const urlReadyRef = useRef(false);
+  const tableTopRef = useRef<HTMLDivElement | null>(null);
   const playerMountRef = useRef<HTMLDivElement | null>(null);
   const ytPlayerRef = useRef<{
     playVideo(): void;
@@ -331,7 +332,7 @@ export default function GamesTable({
 
   function changePage(next: number) {
     setPage(next);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    tableTopRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
   }
 
   const summaryText = loadError
@@ -483,7 +484,7 @@ export default function GamesTable({
         </div>
       </fieldset>
 
-      <div class="table-card">
+      <div class="table-card" ref={tableTopRef}>
         <div class="table-scroll">
           <table class="games-table">
             <thead>
