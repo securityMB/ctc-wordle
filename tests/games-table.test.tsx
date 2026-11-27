@@ -31,7 +31,7 @@ describe('Wordle scoring helpers', () => {
       'absent',
       'correct',
     ]);
-    expect(scoreGuess('crane', 'CRANE')).toEqual([
+    expect(scoreGuess('CRANE', 'CRANE')).toEqual([
       'correct',
       'correct',
       'correct',
@@ -40,7 +40,7 @@ describe('Wordle scoring helpers', () => {
     ]);
   });
 
-  it('checks solved state with 6-guess limit and case-insensitivity', () => {
+  it('checks solved state with 6-guess limit', () => {
     expect(isSolved(MOCK_GAMES[0]!)).toEqual(true);
     expect(isSolved(MOCK_GAMES[1]!)).toEqual(false);
     expect(

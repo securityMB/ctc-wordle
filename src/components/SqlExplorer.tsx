@@ -5,6 +5,9 @@ const MAX_DISPLAY_ROWS = 500;
 
 type StatusState = 'idle' | 'loading' | 'ready' | 'error';
 
+/**
+ * Interactive SQLite query editor and results viewer backed by the `sql.js` Web Worker.
+ */
 export default function SqlExplorer() {
   const [status, setStatus] = useState<{ state: StatusState; text: string }>({
     state: 'idle',

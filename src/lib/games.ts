@@ -10,10 +10,12 @@ export interface RawGame {
 }
 
 /**
- * Loads all monthly Wordle JSON files from `data/20*.json` sorted newest-first.
+ * Loads, validates, and deduplicates all monthly Wordle JSON files (`data/20*.json`),
+ * returning games sorted newest-first.
+ *
+ * Throws if any file does not contain a JSON array or if two games share the same date.
  */
-export function loadAllGames(): RawGame[] {
-  const dataDir = path.join(process.cwd(), 'data');
+export function loadAllGames(dataDir = path.join(process.cwd(), 'data')): RawGame[] {
   const allGames: RawGame[] = [];
 
   if (fs.existsSync(dataDir)) {
@@ -25,12 +27,37 @@ export function loadAllGames(): RawGame[] {
     for (const file of files) {
       const raw = fs.readFileSync(path.join(dataDir, file), 'utf-8');
       const parsed: unknown = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        allGames.push(...(parsed as RawGame[]));
+      if (!Array.isArray(parsed)) {
+        throw new Error(`Invalid format in ${file}: expected a JSON array`);
+      }
+
+      for (const item of parsed) {
+        const g = item as Partial<RawGame>;
+        allGames.push({
+          youtubeId: String(g.youtubeId ?? ''),
+          date: String(g.date ?? ''),
+          correctWord: String(g.correctWord ?? ''),
+          guesses: Array.isArray(g.guesses) ? g.guesses.map(String) : [],
+          solveTimeSeconds:
+            typeof g.solveTimeSeconds === 'number' && Number.isFinite(g.solveTimeSeconds)
+              ? g.solveTimeSeconds
+              : null,
+        });
       }
     }
   }
 
-  allGames.sort((a, b) => b.date.localeCompare(a.date) || b.youtubeId.localeCompare(a.youtubeId));
+  const seenDates = new Map<string, string>();
+  for (const game of allGames) {
+    const existingId = seenDates.get(game.date);
+    if (existingId !== undefined) {
+      throw new Error(
+        `Duplicate date "${game.date}" found for youtubeId "${existingId}" and "${game.youtubeId}"`
+      );
+    }
+    seenDates.set(game.date, game.youtubeId);
+  }
+
+  allGames.sort((a, b) => b.date.localeCompare(a.date));
   return allGames;
 }

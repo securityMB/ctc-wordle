@@ -2,14 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import initSqlJs from 'sql.js';
-
-interface GameRecord {
-  youtubeId: string;
-  date: string;
-  correctWord: string;
-  guesses: string[];
-  solveTimeSeconds: number | null;
-}
+import { loadAllGames } from '../src/lib/games.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -18,38 +11,8 @@ const outDir = path.join(rootDir, 'public', 'data');
 
 fs.mkdirSync(outDir, { recursive: true });
 
-// 1. Read all data/20*.json files (excluding anything else like needs_review.json)
-const files = fs
-  .readdirSync(dataDir)
-  .filter((f) => /^20.*\.json$/.test(f))
-  .sort();
-
-const games: GameRecord[] = [];
-for (const file of files) {
-  const raw = fs.readFileSync(path.join(dataDir, file), 'utf8');
-  const parsed: unknown = JSON.parse(raw);
-  if (!Array.isArray(parsed)) continue;
-  for (const item of parsed) {
-    const g = item as Partial<GameRecord>;
-    games.push({
-      youtubeId: String(g.youtubeId ?? ''),
-      date: String(g.date ?? ''),
-      correctWord: String(g.correctWord ?? ''),
-      guesses: Array.isArray(g.guesses) ? g.guesses.map(String) : [],
-      solveTimeSeconds:
-        typeof g.solveTimeSeconds === 'number' && Number.isFinite(g.solveTimeSeconds)
-          ? g.solveTimeSeconds
-          : null,
-    });
-  }
-}
-
-// Sort newest-first, deterministic tie-breaker on youtubeId
-games.sort((a, b) => {
-  const dateCmp = b.date.localeCompare(a.date);
-  if (dateCmp !== 0) return dateCmp;
-  return a.youtubeId.localeCompare(b.youtubeId);
-});
+// 1. Read and validate all data/20*.json files
+const games = loadAllGames(dataDir);
 
 // 2. Write compact public/data/solves.json
 const solvesJsonPath = path.join(outDir, 'solves.json');

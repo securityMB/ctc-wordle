@@ -6,9 +6,15 @@ import { loadAllGames } from '../lib/games.ts';
 
 const allGames = loadAllGames();
 const initialGames = allGames.slice(0, 50);
-const initialMonths = Array.from(
-  new Set(allGames.map((g) => g.date?.slice(0, 7)).filter((m): m is string => Boolean(m && m.length === 7)))
-).sort((a, b) => b.localeCompare(a));
+
+// Extract unique YYYY-MM prefixes, sorted newest-first, for the initial month dropdown
+const monthSet = new Set<string>();
+for (const game of allGames) {
+  if (game.date && game.date.length >= 7) {
+    monthSet.add(game.date.slice(0, 7));
+  }
+}
+const initialMonths = Array.from(monthSet).sort((a, b) => b.localeCompare(a));
 ---
 
 <Layout>

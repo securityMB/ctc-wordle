@@ -1,20 +1,13 @@
 ---
 import type { RawGame } from '../lib/games.ts';
+import { isSolved } from '../lib/wordle.ts';
 
 interface Props {
   games: RawGame[];
 }
 
 // Sort chronologically ascending for streak calculation
-const games = [...Astro.props.games].sort(
-  (a, b) => a.date.localeCompare(b.date) || a.youtubeId.localeCompare(b.youtubeId)
-);
-
-function isWin(g: RawGame): boolean {
-  if (!Array.isArray(g.guesses) || g.guesses.length === 0 || g.guesses.length > 6) return false;
-  const last = g.guesses[g.guesses.length - 1] ?? '';
-  return last.toUpperCase() === (g.correctWord ?? '').toUpperCase();
-}
+const games = [...Astro.props.games].sort((a, b) => a.date.localeCompare(b.date));
 
 const totalGames = games.length;
 let wins = 0;
@@ -35,7 +28,7 @@ const dist: Record<'1' | '2' | '3' | '4' | '5' | '6' | 'X', number> = {
 const solveTimes: number[] = [];
 
 for (const g of games) {
-  if (isWin(g)) {
+  if (isSolved(g)) {
     wins++;
     const attempts = String(g.guesses.length) as '1' | '2' | '3' | '4' | '5' | '6';
     dist[attempts]++;

@@ -160,6 +160,9 @@ export interface QueryOutput {
   durationMs: number;
 }
 
+/**
+ * Executes a read-only SQL query against the in-browser SQLite database and returns its result sets and duration.
+ */
 export async function runSqlQuery(sql: string): Promise<QueryOutput> {
   await getDatabase();
   const res = await sendWorkerRequest({ type: 'exec', sql });
