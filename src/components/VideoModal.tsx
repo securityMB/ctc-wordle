@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'preact/hooks';
-import { isSolved, type Game } from '../../lib/wordle.ts';
+import { isSolved, type Game } from '#lib/wordle.ts';
 
 let ytApiPromise: Promise<void> | null = null;
 

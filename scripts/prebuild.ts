@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import initSqlJs from 'sql.js';
-import { loadAllGames } from '../lib/games.ts';
-import { isSolved } from '../lib/wordle.ts';
+import { loadAllGames } from '#lib/games.ts';
+import { isSolved } from '#lib/wordle.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');

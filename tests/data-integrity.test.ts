@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadAllGames } from '../lib/games.ts';
+import { loadAllGames } from '#lib/games.ts';
 
 describe('Wordle dataset integrity', () => {
   it('loads all monthly files with unique dates/IDs, valid guesses, and uppercase words', () => {

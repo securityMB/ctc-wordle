@@ -4,11 +4,11 @@ import path from 'node:path';
 import { render } from 'preact';
 import initSqlJs from 'sql.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import SqlExplorer from '../src/components/SqlExplorer.tsx';
-import { SQL_PRESETS } from '../src/scripts/sqlExplorer.ts';
+import SqlExplorer from '#src/components/SqlExplorer.tsx';
+import { SQL_PRESETS } from '#src/scripts/sqlExplorer.ts';
 
-vi.mock('../src/scripts/sqlExplorer.ts', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../src/scripts/sqlExplorer.ts')>();
+vi.mock('#src/scripts/sqlExplorer.ts', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('#src/scripts/sqlExplorer.ts')>();
   return {
     ...actual,
     getDatabase: vi.fn(() => Promise.resolve()),

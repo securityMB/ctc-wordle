@@ -1,4 +1,4 @@
-import type { SortKey } from '../../lib/wordle.ts';
+import type { SortKey } from '#lib/wordle.ts';
 
 interface GamesFiltersProps {
   search: string;

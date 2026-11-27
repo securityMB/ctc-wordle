@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
-import { getDatabase, runSqlQuery, SQL_PRESETS, type QueryOutput } from '../scripts/sqlExplorer';
+import {
+  getDatabase,
+  runSqlQuery,
+  SQL_PRESETS,
+  type QueryOutput,
+} from '#src/scripts/sqlExplorer.ts';
 
 const MAX_DISPLAY_ROWS = 500;
 

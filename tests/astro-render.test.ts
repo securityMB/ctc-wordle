@@ -1,9 +1,9 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { Window } from 'happy-dom';
 import { describe, expect, it } from 'vitest';
-import Layout from '../src/layouts/Layout.astro';
-import StatsBar from '../src/components/StatsBar.astro';
-import type { RawGame } from '../lib/games.ts';
+import Layout from '#src/layouts/Layout.astro';
+import StatsBar from '#src/components/StatsBar.astro';
+import type { RawGame } from '#lib/games.ts';
 
 const SAMPLE_GAMES: RawGame[] = [
   {

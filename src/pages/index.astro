@@ -1,8 +1,8 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import StatsBar from '../components/StatsBar.astro';
-import GamesTable from '../components/GamesTable.tsx';
-import { loadAllGames } from '../../lib/games.ts';
+import Layout from '#src/layouts/Layout.astro';
+import StatsBar from '#src/components/StatsBar.astro';
+import GamesTable from '#src/components/GamesTable.tsx';
+import { loadAllGames } from '#lib/games.ts';
 
 const allGames = loadAllGames();
 const initialGames = allGames.slice(0, 50);

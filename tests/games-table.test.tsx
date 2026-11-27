@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { render } from 'preact';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import GamesTable, { isSolved, scoreGuess, type Game } from '../src/components/GamesTable.tsx';
+import GamesTable, { isSolved, scoreGuess, type Game } from '#src/components/GamesTable.tsx';
 
 const MOCK_GAMES: Game[] = [
   {
