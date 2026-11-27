@@ -43,13 +43,13 @@ describe('SqlExplorer rendering', () => {
     render(<SqlExplorer />, host);
 
     const subtitle = host.querySelector('.sql-subtitle');
-    expect(subtitle?.textContent).toBe(
+    expect(subtitle?.textContent).toEqual(
       'Query the full Wordle archive directly in your browser using SQLite, or download wordle.sqlite.'
     );
 
     const downloadLink = host.querySelector('a[download="wordle.sqlite"]') as HTMLAnchorElement | null;
-    expect(downloadLink?.getAttribute('href')).toBe('/data/wordle.sqlite');
-    expect(downloadLink?.textContent).toBe('download wordle.sqlite');
+    expect(downloadLink?.getAttribute('href')).toEqual('/data/wordle.sqlite');
+    expect(downloadLink?.textContent).toEqual('download wordle.sqlite');
 
     const presetButtons = host.querySelectorAll('.sql-preset-btn');
     expect(presetButtons).toHaveLength(SQL_PRESETS.length);
@@ -60,7 +60,7 @@ describe('SqlExplorer rendering', () => {
     });
     const ths = Array.from(host.querySelectorAll('.sql-table th'));
     expect(ths.map((th) => th.textContent)).toEqual(['date', 'correct_word']);
-    expect(ths.every((th) => th.getAttribute('scope') === 'col')).toBe(true);
+    expect(ths.every((th) => th.getAttribute('scope') === 'col')).toEqual(true);
     expect(
       Array.from(host.querySelectorAll('.sql-table tbody td')).map((td) => td.textContent)
     ).toEqual(['2026-05-02', 'CRANE']);
@@ -70,7 +70,7 @@ describe('SqlExplorer rendering', () => {
 describe('Generated wordle.sqlite database', () => {
   it('executes all SQL_PRESETS against public/data/wordle.sqlite without error', async () => {
     const dbPath = path.resolve(process.cwd(), 'public/data/wordle.sqlite');
-    expect(fs.existsSync(dbPath)).toBe(true);
+    expect(fs.existsSync(dbPath)).toEqual(true);
 
     const SQL = await initSqlJs();
     const db = new SQL.Database(fs.readFileSync(dbPath));

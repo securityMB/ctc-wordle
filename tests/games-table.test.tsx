@@ -41,8 +41,8 @@ describe('Wordle scoring helpers', () => {
   });
 
   it('checks solved state with 6-guess limit and case-insensitivity', () => {
-    expect(isSolved(MOCK_GAMES[0]!)).toBe(true);
-    expect(isSolved(MOCK_GAMES[1]!)).toBe(false);
+    expect(isSolved(MOCK_GAMES[0]!)).toEqual(true);
+    expect(isSolved(MOCK_GAMES[1]!)).toEqual(false);
     expect(
       isSolved({
         youtubeId: 'x',
@@ -51,7 +51,7 @@ describe('Wordle scoring helpers', () => {
         guesses: ['A', 'B', 'C', 'D', 'E', 'F', 'CRANE'],
         solveTimeSeconds: 10,
       })
-    ).toBe(false);
+    ).toEqual(false);
   });
 });
 
@@ -88,10 +88,10 @@ describe('GamesTable rendering and filtering', () => {
 
     const headers = Array.from(host.querySelectorAll('th'));
     expect(headers).toHaveLength(6);
-    expect(headers.every((th) => th.getAttribute('scope') === 'col')).toBe(true);
+    expect(headers.every((th) => th.getAttribute('scope') === 'col')).toEqual(true);
 
     const meta = host.querySelector('.results-meta');
-    expect(meta?.getAttribute('aria-live')).toBe('polite');
+    expect(meta?.getAttribute('aria-live')).toEqual('polite');
 
     const rows = Array.from(host.querySelectorAll('tbody tr'));
     expect(rows).toHaveLength(2);
@@ -127,7 +127,7 @@ describe('GamesTable rendering and filtering', () => {
       const rowsAfterFilter = host.querySelectorAll('tbody tr');
       expect(rowsAfterFilter).toHaveLength(1);
     });
-    expect(host.querySelector('tbody .col-solution')?.textContent).toBe('JAZZY');
+    expect(host.querySelector('tbody .col-solution')?.textContent).toEqual('JAZZY');
 
     const resetBtn = host.querySelector('#filter-reset') as HTMLButtonElement;
     resetBtn.click();

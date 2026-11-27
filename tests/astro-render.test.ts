@@ -75,18 +75,18 @@ describe('Astro components rendering', () => {
     });
     const doc = parseHtml(html);
 
-    expect(doc.title).toBe('Custom Test Title');
-    expect(doc.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
+    expect(doc.title).toEqual('Custom Test Title');
+    expect(doc.querySelector('meta[name="description"]')?.getAttribute('content')).toEqual(
       'Custom test description'
     );
-    expect(doc.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
+    expect(doc.querySelector('link[rel="canonical"]')?.getAttribute('href')).toEqual(
       'https://example.com/'
     );
-    expect(doc.querySelector('meta[property="og:title"]')?.getAttribute('content')).toBe(
+    expect(doc.querySelector('meta[property="og:title"]')?.getAttribute('content')).toEqual(
       'Custom Test Title'
     );
-    expect(doc.querySelector('meta[name="twitter:card"]')?.getAttribute('content')).toBe('summary');
+    expect(doc.querySelector('meta[name="twitter:card"]')?.getAttribute('content')).toEqual('summary');
     expect(doc.querySelector('.brand-link')?.getAttribute('tabindex')).toBeNull();
-    expect(doc.querySelector('#theme-toggle')?.getAttribute('aria-pressed')).toBe('false');
+    expect(doc.querySelector('#theme-toggle')?.getAttribute('aria-pressed')).toEqual('false');
   });
 });
