@@ -73,6 +73,27 @@ function readFiltersFromUrl() {
   return { q, attempts, month, exactDate, fromDate, toDate, sortBy, page };
 }
 
+let ytApiPromise: Promise<void> | null = null;
+
+function loadYtIframeApi(): Promise<void> {
+  if (typeof window === 'undefined') return Promise.resolve();
+  if (window.YT?.Player) return Promise.resolve();
+  if (!ytApiPromise) {
+    ytApiPromise = new Promise<void>((resolve) => {
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        prev?.();
+        resolve();
+      };
+      const script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      script.async = true;
+      document.head.appendChild(script);
+    });
+  }
+  return ytApiPromise;
+}
+
 export default function GamesTable({
   initialGames = [],
   initialTotal = 0,
@@ -91,8 +112,71 @@ export default function GamesTable({
   const [toDate, setToDate] = useState('');
   const [sortBy, setSortBy] = useState<SortKey>('newest');
   const [page, setPage] = useState(1);
+  const [activeVideo, setActiveVideo] = useState<Game | null>(null);
 
   const urlReadyRef = useRef(false);
+  const playerMountRef = useRef<HTMLDivElement | null>(null);
+  const ytPlayerRef = useRef<{
+    playVideo(): void;
+    pauseVideo(): void;
+    getPlayerState(): number;
+    getCurrentTime(): number;
+    seekTo(seconds: number, allowSeekAhead: boolean): void;
+    destroy(): void;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!activeVideo) return;
+    let cancelled = false;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    void loadYtIframeApi().then(() => {
+      if (cancelled || !playerMountRef.current || !window.YT?.Player) return;
+      playerMountRef.current.textContent = '';
+      const target = document.createElement('div');
+      playerMountRef.current.appendChild(target);
+      ytPlayerRef.current = new window.YT.Player(target, {
+        videoId: activeVideo.youtubeId,
+        host: 'https://www.youtube-nocookie.com',
+        playerVars: { autoplay: 1, rel: 0, enablejsapi: 1 },
+      });
+    });
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveVideo(null);
+        return;
+      }
+      const player = ytPlayerRef.current;
+      if (!player) return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        const playingState = window.YT?.PlayerState?.PLAYING ?? 1;
+        if (player.getPlayerState() === playingState) {
+          player.pauseVideo();
+        } else {
+          player.playVideo();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        player.seekTo(Math.max(0, player.getCurrentTime() - 10), true);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        player.seekTo(player.getCurrentTime() + 10, true);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      cancelled = true;
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+      ytPlayerRef.current?.destroy();
+      ytPlayerRef.current = null;
+    };
+  }, [activeVideo]);
 
   // Sync from URL on mount & browser Back/Forward
   useEffect(() => {
@@ -466,6 +550,11 @@ export default function GamesTable({
                             href={`https://youtu.be/${encodeURIComponent(g.youtubeId)}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => {
+                              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                              e.preventDefault();
+                              setActiveVideo(g);
+                            }}
                           >
                             ▶ Watch
                           </a>
@@ -505,6 +594,55 @@ export default function GamesTable({
           </div>
         </div>
       </div>
+
+      {activeVideo && (
+        <div
+          class="video-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Wordle ${activeVideo.date} — ${activeVideo.correctWord}`}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setActiveVideo(null);
+          }}
+        >
+          <div class="video-modal">
+            <div class="video-modal-header">
+              <div class="video-modal-title">
+                <span class="video-modal-date">{activeVideo.date}</span>
+                <span class="video-modal-word">{activeVideo.correctWord.toUpperCase()}</span>
+                <span class={`score-badge ${isSolved(activeVideo) ? 'win' : 'fail'}`}>
+                  {isSolved(activeVideo) ? `${activeVideo.guesses.length}/6` : 'X/6'}
+                </span>
+                {typeof activeVideo.solveTimeSeconds === 'number' && (
+                  <span class="video-modal-time">{activeVideo.solveTimeSeconds.toFixed(1)}s</span>
+                )}
+              </div>
+              <div class="video-modal-actions">
+                <a
+                  class="video-modal-ext"
+                  href={`https://youtu.be/${encodeURIComponent(activeVideo.youtubeId)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  YouTube ↗
+                </a>
+                <button
+                  type="button"
+                  class="video-modal-close"
+                  aria-label="Close video"
+                  onClick={() => setActiveVideo(null)}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div class="video-modal-player" ref={playerMountRef} />
+            <div class="video-modal-footer">
+              <span>Space: play/pause · ←/→: ±10s · Esc: close</span>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
