@@ -90,18 +90,18 @@ LIMIT 25;`,
 let dbPromise: Promise<Database> | null = null;
 
 /**
- * Lazily loads sql.js, the WASM binary, and /data/wordle.db once on demand.
+ * Lazily loads sql.js, the WASM binary, and /data/wordle.sqlite once on demand.
  */
 export async function getDatabase(): Promise<Database> {
   if (!dbPromise) {
     dbPromise = (async () => {
       const [{ default: initSqlJs }, dbResponse] = await Promise.all([
         import('sql.js'),
-        fetch(`/data/wordle.db?v=${__BUILD_ID__}`),
+        fetch(`/data/wordle.sqlite?v=${__BUILD_ID__}`),
       ]);
 
       if (!dbResponse.ok) {
-        throw new Error(`Failed to fetch /data/wordle.db (HTTP ${dbResponse.status})`);
+        throw new Error(`Failed to fetch /data/wordle.sqlite (HTTP ${dbResponse.status})`);
       }
 
       const [SQL, dbBuffer] = await Promise.all([

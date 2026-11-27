@@ -55,7 +55,7 @@ games.sort((a, b) => {
 const solvesJsonPath = path.join(outDir, 'solves.json');
 fs.writeFileSync(solvesJsonPath, JSON.stringify(games));
 
-// 3. Build public/data/wordle.db via sql.js
+// 3. Build public/data/wordle.sqlite via sql.js
 const wasmSrc = path.join(rootDir, 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm');
 const wasmDst = path.join(outDir, 'sql-wasm.wasm');
 fs.copyFileSync(wasmSrc, wasmDst);
@@ -120,14 +120,14 @@ db.run(`
 `);
 
 const dbBytes = db.export();
-const dbPath = path.join(outDir, 'wordle.db');
+const dbPath = path.join(outDir, 'wordle.sqlite');
 fs.writeFileSync(dbPath, Buffer.from(dbBytes));
 db.close();
 
 console.log(
   `prebuild complete: ${games.length} games -> solves.json (${(
     fs.statSync(solvesJsonPath).size / 1024
-  ).toFixed(1)} KB), wordle.db (${(
+  ).toFixed(1)} KB), wordle.sqlite (${(
     fs.statSync(dbPath).size / 1024
   ).toFixed(1)} KB), sql-wasm.wasm`
 );

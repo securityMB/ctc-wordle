@@ -44,7 +44,7 @@ export default function SqlExplorer() {
   const activate = useCallback(async () => {
     if (initializedRef.current || initializingRef.current) return;
     initializingRef.current = true;
-    setStatus({ state: 'loading', text: 'Loading SQLite WASM & wordle.db…' });
+    setStatus({ state: 'loading', text: 'Loading SQLite WASM & wordle.sqlite…' });
 
     try {
       await getDatabase();
@@ -77,7 +77,11 @@ export default function SqlExplorer() {
           <div>
             <h2 class="sql-title">SQL Explorer</h2>
             <p class="sql-subtitle">
-              Query the full Wordle archive directly in your browser using SQLite (WebAssembly).
+              Query the full Wordle archive directly in your browser using SQLite, or{' '}
+              <a href="/data/wordle.sqlite" download="wordle.sqlite">
+                download wordle.sqlite
+              </a>
+              .
             </p>
           </div>
           <div class="sql-status" data-state={status.state} aria-live="polite">
