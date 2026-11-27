@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import initSqlJs from 'sql.js';
 import { loadAllGames } from '../src/lib/games.ts';
+import { isSolved } from '../src/lib/wordle.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -54,8 +55,7 @@ const insertGuess = db.prepare(
 );
 
 for (const g of games) {
-  const solved =
-    g.guesses.length > 0 && g.guesses[g.guesses.length - 1] === g.correctWord ? 1 : 0;
+  const solved = isSolved(g) ? 1 : 0;
   const attempts = g.guesses.length;
   insertGame.run([
     g.youtubeId,

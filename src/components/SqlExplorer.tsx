@@ -21,11 +21,15 @@ export default function SqlExplorer() {
 
   const initializedRef = useRef(false);
   const initializingRef = useRef(false);
+  const requestIdRef = useRef(0);
+  const initialSqlRef = useRef(sql);
 
   const execute = useCallback(async (queryText: string) => {
+    const reqId = ++requestIdRef.current;
     const trimmed = queryText.trim();
     if (!trimmed) {
       setError('Please enter a SQL query.');
+      setRunning(false);
       return;
     }
 
@@ -33,14 +37,18 @@ export default function SqlExplorer() {
     setRunning(true);
     try {
       const res = await runSqlQuery(trimmed);
+      if (reqId !== requestIdRef.current) return;
       setOutput(res);
       setStatus({ state: 'ready', text: 'SQLite WASM ready' });
     } catch (err: unknown) {
+      if (reqId !== requestIdRef.current) return;
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg);
       setOutput(null);
     } finally {
-      setRunning(false);
+      if (reqId === requestIdRef.current) {
+        setRunning(false);
+      }
     }
   }, []);
 
@@ -53,7 +61,7 @@ export default function SqlExplorer() {
       await getDatabase();
       initializedRef.current = true;
       setStatus({ state: 'ready', text: 'SQLite WASM ready' });
-      await execute(sql);
+      await execute(initialSqlRef.current);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setStatus({ state: 'error', text: 'Failed to load SQLite' });
@@ -61,7 +69,7 @@ export default function SqlExplorer() {
     } finally {
       initializingRef.current = false;
     }
-  }, [execute, sql]);
+  }, [execute]);
 
   useEffect(() => {
     void activate();
@@ -169,6 +177,8 @@ export default function SqlExplorer() {
               type="button"
               class="sql-clear-btn"
               onClick={() => {
+                requestIdRef.current += 1;
+                setRunning(false);
                 setSql('');
                 setActivePreset('');
                 setError('');
