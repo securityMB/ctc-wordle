@@ -77,15 +77,15 @@ solveTimes.sort((a, b) => a - b);
 
 const winRate = totalGames > 0 ? ((wins / totalGames) * 100).toFixed(1) : '0.0';
 const avgGuesses = wins > 0 ? (totalSolvedGuesses / wins).toFixed(2) : '—';
-const fastestTime = solveTimes.length > 0 ? `${solveTimes[0].toFixed(1)}s` : '—';
+const fastestTime = solveTimes[0] !== undefined ? `${solveTimes[0].toFixed(1)}s` : '—';
 
 let medianTime = '—';
 if (solveTimes.length > 0) {
   const mid = Math.floor(solveTimes.length / 2);
   const med =
     solveTimes.length % 2 === 0
-      ? (solveTimes[mid - 1] + solveTimes[mid]) / 2
-      : solveTimes[mid];
+      ? ((solveTimes[mid - 1] ?? 0) + (solveTimes[mid] ?? 0)) / 2
+      : (solveTimes[mid] ?? 0);
   medianTime = `${med.toFixed(1)}s`;
 }
 

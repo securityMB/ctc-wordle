@@ -103,7 +103,7 @@ for (const g of games) {
     g.solveTimeSeconds,
   ]);
   for (let i = 0; i < g.guesses.length; i++) {
-    insertGuess.run([g.youtubeId, i + 1, g.guesses[i]]);
+    insertGuess.run([g.youtubeId, i + 1, g.guesses[i] ?? '']);
   }
 }
 

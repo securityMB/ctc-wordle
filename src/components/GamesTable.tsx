@@ -34,20 +34,21 @@ function scoreGuess(guess: string, target: string): TileState[] {
   const remaining: Record<string, number> = Object.create(null);
 
   for (let i = 0; i < t.length; i++) {
-    if (g[i] === t[i]) {
+    const tc = t[i] ?? '';
+    if (g[i] === tc) {
       result[i] = 'correct';
-    } else {
-      const ch = t[i];
-      remaining[ch] = (remaining[ch] || 0) + 1;
+    } else if (tc) {
+      remaining[tc] = (remaining[tc] ?? 0) + 1;
     }
   }
 
   for (let i = 0; i < g.length; i++) {
     if (result[i] === 'correct') continue;
-    const ch = g[i];
-    if (remaining[ch] > 0) {
+    const ch = g[i] ?? '';
+    const count = remaining[ch] ?? 0;
+    if (ch && count > 0) {
       result[i] = 'present';
-      remaining[ch]--;
+      remaining[ch] = count - 1;
     }
   }
 

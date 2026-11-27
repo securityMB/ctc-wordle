@@ -10,8 +10,8 @@ export default function SqlExplorer() {
     state: 'idle',
     text: 'Idle — activates on open',
   });
-  const [activePreset, setActivePreset] = useState(SQL_PRESETS[0].id);
-  const [sql, setSql] = useState(SQL_PRESETS[0].sql);
+  const [activePreset, setActivePreset] = useState(SQL_PRESETS[0]?.id ?? '');
+  const [sql, setSql] = useState(SQL_PRESETS[0]?.sql ?? '');
   const [running, setRunning] = useState(false);
   const [error, setError] = useState('');
   const [output, setOutput] = useState<QueryOutput | null>(null);
