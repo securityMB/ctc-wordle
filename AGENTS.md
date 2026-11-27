@@ -6,7 +6,7 @@ Static Astro 7 + Preact archive for Cracking The Cryptic's _Wordle in a Minute_ 
 
 - **Source of truth:** `data/20*.json` (monthly arrays of `{ youtubeId, date, correctWord, guesses, solveTimeSeconds }`).
 - **Build-generated files (do not edit manually):** `scripts/prebuild.ts` generates `public/data/solves.json`, `public/data/wordle.sqlite`, and `public/data/sql-wasm.wasm`.
-- **Shared SSG loader:** `src/lib/games.ts` (`loadAllGames()`) loads `data/20*.json` for `src/pages/index.astro` and `src/components/StatsBar.astro`.
+- **Shared domain & SSG loader:** `lib/games.ts` (`loadAllGames()`) and `lib/wordle.ts` (`isSolved()`, `scoreGuess()`) are shared across `scripts/prebuild.ts`, `src/pages/index.astro`, and `src/components/`.
 - **SQL Explorer:** `src/components/SqlExplorer.tsx` communicates with `src/scripts/sqlExplorer.ts`, which runs `sql.js` inside a dedicated Web Worker (`src/scripts/sqlWorker.ts`) with `PRAGMA query_only = ON;` against `/data/wordle.sqlite`.
 
 ## Verification Commands

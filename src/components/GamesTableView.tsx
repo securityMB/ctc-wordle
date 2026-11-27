@@ -1,6 +1,6 @@
 import type { RefObject } from 'preact';
 import { useMemo } from 'preact/hooks';
-import type { Game, PreparedGame } from '../lib/wordle.ts';
+import type { Game, PreparedGame } from '../../lib/wordle.ts';
 
 interface GamesTableViewProps {
   pageGames: PreparedGame[];

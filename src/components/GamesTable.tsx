@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { prepareGames, type Game, type PreparedGame, type SortKey } from '../lib/wordle.ts';
+import { prepareGames, type Game, type PreparedGame, type SortKey } from '../../lib/wordle.ts';
 import GamesFilters from './GamesFilters.tsx';
 import GamesTableView from './GamesTableView.tsx';
 import VideoModal from './VideoModal.tsx';
 
-export { isSolved, scoreGuess, type Game } from '../lib/wordle.ts';
+export { isSolved, scoreGuess, type Game } from '../../lib/wordle.ts';
 
 interface GamesTableProps {
   initialGames?: Game[];
