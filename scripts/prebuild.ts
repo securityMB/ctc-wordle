@@ -51,9 +51,9 @@ games.sort((a, b) => {
   return a.youtubeId.localeCompare(b.youtubeId);
 });
 
-// 2. Write compact public/data/games.min.json
-const minJsonPath = path.join(outDir, 'games.min.json');
-fs.writeFileSync(minJsonPath, JSON.stringify(games));
+// 2. Write compact public/data/solves.json
+const solvesJsonPath = path.join(outDir, 'solves.json');
+fs.writeFileSync(solvesJsonPath, JSON.stringify(games));
 
 // 3. Build public/data/wordle.db via sql.js
 const wasmSrc = path.join(rootDir, 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm');
@@ -125,8 +125,8 @@ fs.writeFileSync(dbPath, Buffer.from(dbBytes));
 db.close();
 
 console.log(
-  `prebuild complete: ${games.length} games -> games.min.json (${(
-    fs.statSync(minJsonPath).size / 1024
+  `prebuild complete: ${games.length} games -> solves.json (${(
+    fs.statSync(solvesJsonPath).size / 1024
   ).toFixed(1)} KB), wordle.db (${(
     fs.statSync(dbPath).size / 1024
   ).toFixed(1)} KB), sql-wasm.wasm`

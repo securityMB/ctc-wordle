@@ -1,5 +1,30 @@
 [
   {
+    "youtubeId": "B_oAc_4zJ9I",
+    "date": "2022-02-24",
+    "correctWord": "BLOKE",
+    "guesses": [
+      "SONIC",
+      "TRADE",
+      "BLOKE"
+    ],
+    "solveTimeSeconds": 21.82
+  },
+  {
+    "youtubeId": "jsOJlIqm4OQ",
+    "date": "2022-02-25",
+    "correctWord": "VIVID",
+    "guesses": [
+      "METAL",
+      "COINS",
+      "DUMPY",
+      "PLAID",
+      "RIGID",
+      "VIVID"
+    ],
+    "solveTimeSeconds": 56.6
+  },
+  {
     "youtubeId": "MVTljsWGKAA",
     "date": "2022-02-26",
     "correctWord": "SPILL",
@@ -10,7 +35,7 @@
       "SKILL",
       "SPILL"
     ],
-    "solveTimeSeconds": null
+    "solveTimeSeconds": 52.1
   },
   {
     "youtubeId": "-saJ7vdhU0o",

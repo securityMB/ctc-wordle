@@ -97,7 +97,7 @@ export async function getDatabase(): Promise<Database> {
     dbPromise = (async () => {
       const [{ default: initSqlJs }, dbResponse] = await Promise.all([
         import('sql.js'),
-        fetch('/data/wordle.db'),
+        fetch(`/data/wordle.db?v=${__BUILD_ID__}`),
       ]);
 
       if (!dbResponse.ok) {
@@ -106,7 +106,7 @@ export async function getDatabase(): Promise<Database> {
 
       const [SQL, dbBuffer] = await Promise.all([
         initSqlJs({
-          locateFile: () => '/data/sql-wasm.wasm',
+          locateFile: () => `/data/sql-wasm.wasm?v=${__BUILD_ID__}`,
         }),
         dbResponse.arrayBuffer(),
       ]);
