@@ -1,5 +1,7 @@
 # CTC Wordle Archive
 
+**Live site:** <https://ctc-wordle.netlify.app/>
+
 A fast, static searchable archive of **Wordle in a Minute** solves from [Cracking The Cryptic](https://www.youtube.com/@CrackingTheCryptic), featuring full color-coded guess boards, solve times, and an in-browser SQLite explorer.
 
 > **Disclaimer:** This is a fan-made project and is **not affiliated with Cracking The Cryptic**. Guesses and solve times are extracted automatically from videos using computer vision, a custom ML classifier, and a VLM, so occasional inaccuracies may occur.
