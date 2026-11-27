@@ -1,0 +1,74 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import Layout from '../layouts/Layout.astro';
+import StatsBar from '../components/StatsBar.astro';
+import GamesTable, { type Game } from '../components/GamesTable.tsx';
+import SqlExplorer from '../components/SqlExplorer.tsx';
+
+const dataDir = path.join(process.cwd(), 'data');
+const allGames: Game[] = [];
+
+if (fs.existsSync(dataDir)) {
+  const files = fs
+    .readdirSync(dataDir)
+    .filter((f) => /^20.*\.json$/.test(f))
+    .sort();
+
+  for (const file of files) {
+    const raw = fs.readFileSync(path.join(dataDir, file), 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      allGames.push(...parsed);
+    }
+  }
+}
+
+allGames.sort((a, b) => b.date.localeCompare(a.date) || b.youtubeId.localeCompare(a.youtubeId));
+
+const initialGames = allGames.slice(0, 50);
+const initialMonths = Array.from(
+  new Set(allGames.map((g) => g.date?.slice(0, 7)).filter((m): m is string => Boolean(m && m.length === 7)))
+).sort((a, b) => b.localeCompare(a));
+---
+
+<Layout>
+  <div id="panel-archive" class="view-panel" role="tabpanel" aria-labelledby="tab-archive">
+    <StatsBar />
+    <GamesTable
+      client:load
+      initialGames={initialGames}
+      initialTotal={allGames.length}
+      initialMonths={initialMonths}
+    />
+  </div>
+
+  <div id="panel-sql" class="view-panel" role="tabpanel" aria-labelledby="tab-sql" hidden>
+    <SqlExplorer client:load />
+  </div>
+
+  <script>
+    const tabArchive = document.getElementById('tab-archive');
+    const tabSql = document.getElementById('tab-sql');
+    const panelArchive = document.getElementById('panel-archive');
+    const panelSql = document.getElementById('panel-sql');
+
+    function activateTab(target: 'archive' | 'sql'): void {
+      const isSql = target === 'sql';
+      tabArchive?.classList.toggle('active', !isSql);
+      tabSql?.classList.toggle('active', isSql);
+      tabArchive?.setAttribute('aria-selected', String(!isSql));
+      tabSql?.setAttribute('aria-selected', String(isSql));
+
+      if (panelArchive) panelArchive.hidden = isSql;
+      if (panelSql) panelSql.hidden = !isSql;
+
+      if (isSql) {
+        window.dispatchEvent(new CustomEvent('sql-explorer:activate'));
+      }
+    }
+
+    tabArchive?.addEventListener('click', () => activateTab('archive'));
+    tabSql?.addEventListener('click', () => activateTab('sql'));
+  </script>
+</Layout>

@@ -1,0 +1,39 @@
+[
+  {
+    "youtubeId": "MVTljsWGKAA",
+    "date": "2022-02-26",
+    "correctWord": "SPILL",
+    "guesses": [
+      "COINS",
+      "DELTA",
+      "BLISS",
+      "SKILL",
+      "SPILL"
+    ],
+    "solveTimeSeconds": null
+  },
+  {
+    "youtubeId": "-saJ7vdhU0o",
+    "date": "2022-02-27",
+    "correctWord": "CHANT",
+    "guesses": [
+      "STALE",
+      "DINGO",
+      "QUANT",
+      "CHANT"
+    ],
+    "solveTimeSeconds": 39.94
+  },
+  {
+    "youtubeId": "CEk3iVDs1j8",
+    "date": "2022-02-28",
+    "correctWord": "CHOKE",
+    "guesses": [
+      "STEAL",
+      "MINCE",
+      "CLOVE",
+      "CHOKE"
+    ],
+    "solveTimeSeconds": 28.23
+  }
+]

@@ -1,0 +1,157 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+
+interface RawGame {
+  youtubeId: string;
+  date: string;
+  correctWord: string;
+  guesses: string[];
+  solveTimeSeconds?: number | null;
+}
+
+const dataDir = path.join(process.cwd(), 'data');
+let games: RawGame[] = [];
+
+if (fs.existsSync(dataDir)) {
+  const files = fs
+    .readdirSync(dataDir)
+    .filter((f) => /^20.*\.json$/.test(f))
+    .sort();
+
+  for (const file of files) {
+    const raw = fs.readFileSync(path.join(dataDir, file), 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      games.push(...parsed);
+    }
+  }
+}
+
+// Sort chronologically ascending for streak calculation
+games.sort((a, b) => a.date.localeCompare(b.date) || a.youtubeId.localeCompare(b.youtubeId));
+
+function isWin(g: RawGame): boolean {
+  if (!Array.isArray(g.guesses) || g.guesses.length === 0 || g.guesses.length > 6) return false;
+  const last = g.guesses[g.guesses.length - 1] ?? '';
+  return last.toUpperCase() === (g.correctWord ?? '').toUpperCase();
+}
+
+const totalGames = games.length;
+let wins = 0;
+let totalSolvedGuesses = 0;
+let currentStreak = 0;
+let maxStreak = 0;
+
+const dist: Record<'1' | '2' | '3' | '4' | '5' | '6' | 'X', number> = {
+  '1': 0,
+  '2': 0,
+  '3': 0,
+  '4': 0,
+  '5': 0,
+  '6': 0,
+  X: 0,
+};
+
+const solveTimes: number[] = [];
+
+for (const g of games) {
+  if (isWin(g)) {
+    wins++;
+    const attempts = String(g.guesses.length) as '1' | '2' | '3' | '4' | '5' | '6';
+    dist[attempts]++;
+    totalSolvedGuesses += g.guesses.length;
+    currentStreak++;
+    if (currentStreak > maxStreak) maxStreak = currentStreak;
+  } else {
+    dist.X++;
+    currentStreak = 0;
+  }
+
+  if (typeof g.solveTimeSeconds === 'number' && Number.isFinite(g.solveTimeSeconds)) {
+    solveTimes.push(g.solveTimeSeconds);
+  }
+}
+
+solveTimes.sort((a, b) => a - b);
+
+const winRate = totalGames > 0 ? ((wins / totalGames) * 100).toFixed(1) : '0.0';
+const avgGuesses = wins > 0 ? (totalSolvedGuesses / wins).toFixed(2) : '—';
+const fastestTime = solveTimes.length > 0 ? `${solveTimes[0].toFixed(1)}s` : '—';
+
+let medianTime = '—';
+if (solveTimes.length > 0) {
+  const mid = Math.floor(solveTimes.length / 2);
+  const med =
+    solveTimes.length % 2 === 0
+      ? (solveTimes[mid - 1] + solveTimes[mid]) / 2
+      : solveTimes[mid];
+  medianTime = `${med.toFixed(1)}s`;
+}
+
+const distKeys = ['1', '2', '3', '4', '5', '6', 'X'] as const;
+const maxDistCount = Math.max(1, ...distKeys.map((k) => dist[k]));
+---
+
+<section class="stats-section" aria-label="Summary statistics">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{totalGames.toLocaleString('en-US')}</div>
+      <div class="stat-label">Total Games</div>
+      <div class="stat-sub">{wins.toLocaleString('en-US')} solved</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{winRate}%</div>
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-sub">{dist.X} failed</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{avgGuesses}</div>
+      <div class="stat-label">Avg Guesses</div>
+      <div class="stat-sub">On solved games</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{medianTime}</div>
+      <div class="stat-label">Median Time</div>
+      <div class="stat-sub">Fastest: {fastestTime}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value">{currentStreak}</div>
+      <div class="stat-label">Current Streak</div>
+      <div class="stat-sub">Max: {maxStreak}</div>
+    </div>
+  </div>
+
+  <div class="dist-card">
+    <div class="dist-header">
+      <h2 class="dist-title">Guess Distribution</h2>
+    </div>
+    <div class="dist-bars">
+      {
+        distKeys.map((key) => {
+          const count = dist[key];
+          const pct = totalGames > 0 ? ((count / totalGames) * 100).toFixed(1) : '0.0';
+          const widthPct = count > 0 ? Math.max(4, Math.round((count / maxDistCount) * 100)) : 0;
+          return (
+            <div class="dist-row" title={`${key === 'X' ? 'Failed' : `${key} guesses`}: ${count} (${pct}%)`}>
+              <span class="dist-guess">{key}</span>
+              <div class="dist-bar-wrap">
+                <div
+                  class={`dist-bar-fill ${key === 'X' ? 'fail' : ''}`}
+                  style={`width: ${widthPct}%`}
+                >
+                  <span class="dist-count">{count}</span>
+                </div>
+              </div>
+              <span class="dist-pct">{pct}%</span>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,18 @@
+{
+  "name": "ctc-wordle",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "prebuild": "node scripts/prebuild.mjs",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/preact": "^6.1.6",
+    "astro": "^5.0.0",
+    "preact": "^11.2.0",
+    "sql.js": "^1.12.0"
+  }
+}
