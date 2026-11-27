@@ -9,7 +9,13 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "vitest run"
+    "test": "vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,astro,css,json,md}": "prettier --check"
   },
   "dependencies": {
     "@astrojs/preact": "^6.1.6",
@@ -22,6 +28,10 @@
     "@types/node": "^26.6.11",
     "@types/sql.js": "^1.16.1",
     "happy-dom": "^21.0.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.2",
+    "prettier": "^3.10.1",
+    "prettier-plugin-astro": "^1.1.2",
     "typescript": "^6.0.3",
     "vitest": "^5.1.2"
   }

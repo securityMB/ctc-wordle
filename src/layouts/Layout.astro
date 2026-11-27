@@ -13,7 +13,9 @@ const {
 
 const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const isSqlPage = pathname === '/sql-explorer';
-const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : Astro.url.href;
+const canonicalUrl = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).toString()
+  : Astro.url.href;
 ---
 
 <!doctype html>
@@ -69,7 +71,11 @@ const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toStri
         <nav class="site-nav" aria-label="Main navigation">
           <ul class="nav-list">
             <li class="nav-tabs-group">
-              <a href="/" class={`nav-link${!isSqlPage ? ' active' : ''}`} aria-current={!isSqlPage ? 'page' : undefined}>
+              <a
+                href="/"
+                class={`nav-link${!isSqlPage ? ' active' : ''}`}
+                aria-current={!isSqlPage ? 'page' : undefined}
+              >
                 Archive
               </a>
               <a
@@ -88,7 +94,9 @@ const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toStri
                 aria-label="Toggle color theme"
                 aria-pressed="false"
               >
-                <span id="theme-icon" aria-hidden="true">◐</span>
+                <span id="theme-icon" aria-hidden="true">
+                  ◐
+                </span>
                 <span id="theme-label">Dark</span>
               </button>
             </li>
@@ -98,16 +106,24 @@ const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toStri
         <section class="intro-prose">
           <p>
             Every <strong>Wordle in a Minute</strong> solve from{' '}
-            <a href="https://www.youtube.com/@CrackingTheCryptic" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://www.youtube.com/@CrackingTheCryptic"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Cracking The Cryptic
             </a>{' '}
             with full guess boards, solve times, and a browser-based SQLite explorer.
           </p>
           <p class="intro-disclaimer">
-            This is a fan-made project and is not affiliated with Cracking The Cryptic. Guesses and solve
-            times are extracted automatically from videos using computer vision, a custom ML classifier,
-            and a VLM, so occasional inaccuracies may occur. Source code on{' '}
-            <a href="https://github.com/securityMB/ctc-wordle" target="_blank" rel="noopener noreferrer">
+            This is a fan-made project and is not affiliated with Cracking The Cryptic. Guesses and
+            solve times are extracted automatically from videos using computer vision, a custom ML
+            classifier, and a VLM, so occasional inaccuracies may occur. Source code on{' '}
+            <a
+              href="https://github.com/securityMB/ctc-wordle"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               GitHub
             </a>
             .

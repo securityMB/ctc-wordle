@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import {
-  prepareGames,
-  type Game,
-  type PreparedGame,
-  type SortKey,
-} from '../lib/wordle.ts';
+import { prepareGames, type Game, type PreparedGame, type SortKey } from '../lib/wordle.ts';
 import GamesFilters from './GamesFilters.tsx';
 import GamesTableView from './GamesTableView.tsx';
 import VideoModal from './VideoModal.tsx';
@@ -231,7 +226,12 @@ export default function GamesTable({
       <div class="section-heading-row">
         <h2 class="section-heading">
           Solves{' '}
-          <a href="/data/solves.json" target="_blank" rel="noopener noreferrer" class="section-json-link">
+          <a
+            href="/data/solves.json"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="section-json-link"
+          >
             .json
           </a>
         </h2>

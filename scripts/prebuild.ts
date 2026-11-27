@@ -50,21 +50,12 @@ db.run('BEGIN TRANSACTION;');
 const insertGame = db.prepare(
   'INSERT INTO games (youtube_id, date, correct_word, attempts, solved, solve_time_seconds) VALUES (?, ?, ?, ?, ?, ?)'
 );
-const insertGuess = db.prepare(
-  'INSERT INTO guesses (youtube_id, row_num, word) VALUES (?, ?, ?)'
-);
+const insertGuess = db.prepare('INSERT INTO guesses (youtube_id, row_num, word) VALUES (?, ?, ?)');
 
 for (const g of games) {
   const solved = isSolved(g) ? 1 : 0;
   const attempts = g.guesses.length;
-  insertGame.run([
-    g.youtubeId,
-    g.date,
-    g.correctWord,
-    attempts,
-    solved,
-    g.solveTimeSeconds,
-  ]);
+  insertGame.run([g.youtubeId, g.date, g.correctWord, attempts, solved, g.solveTimeSeconds]);
   for (let i = 0; i < g.guesses.length; i++) {
     insertGuess.run([g.youtubeId, i + 1, g.guesses[i] ?? '']);
   }
@@ -90,7 +81,7 @@ db.close();
 console.log(
   `prebuild complete: ${games.length} games -> solves.json (${(
     fs.statSync(solvesJsonPath).size / 1024
-  ).toFixed(1)} KB), wordle.sqlite (${(
-    fs.statSync(dbPath).size / 1024
-  ).toFixed(1)} KB), sql-wasm.wasm`
+  ).toFixed(1)} KB), wordle.sqlite (${(fs.statSync(dbPath).size / 1024).toFixed(
+    1
+  )} KB), sql-wasm.wasm`
 );

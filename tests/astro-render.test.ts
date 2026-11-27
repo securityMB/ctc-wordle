@@ -85,7 +85,9 @@ describe('Astro components rendering', () => {
     expect(doc.querySelector('meta[property="og:title"]')?.getAttribute('content')).toEqual(
       'Custom Test Title'
     );
-    expect(doc.querySelector('meta[name="twitter:card"]')?.getAttribute('content')).toEqual('summary');
+    expect(doc.querySelector('meta[name="twitter:card"]')?.getAttribute('content')).toEqual(
+      'summary'
+    );
     expect(doc.querySelector('.brand-link')?.getAttribute('tabindex')).toBeNull();
     expect(doc.querySelector('#theme-toggle')?.getAttribute('aria-pressed')).toEqual('false');
   });

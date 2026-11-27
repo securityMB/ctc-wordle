@@ -1,6 +1,6 @@
 # AGENTS.md — ctc-wordle
 
-Static Astro 7 + Preact archive for Cracking The Cryptic's *Wordle in a Minute* solves, deployed to Netlify (`https://ctc-wordle.netlify.app`).
+Static Astro 7 + Preact archive for Cracking The Cryptic's _Wordle in a Minute_ solves, deployed to Netlify (`https://ctc-wordle.netlify.app`).
 
 ## Data & Build Pipeline
 

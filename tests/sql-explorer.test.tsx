@@ -47,7 +47,9 @@ describe('SqlExplorer rendering', () => {
       'Query the full Wordle archive directly in your browser using SQLite, or download wordle.sqlite.'
     );
 
-    const downloadLink = host.querySelector('a[download="wordle.sqlite"]') as HTMLAnchorElement | null;
+    const downloadLink = host.querySelector(
+      'a[download="wordle.sqlite"]'
+    ) as HTMLAnchorElement | null;
     expect(downloadLink?.getAttribute('href')).toEqual('/data/wordle.sqlite');
     expect(downloadLink?.textContent).toEqual('download wordle.sqlite');
 

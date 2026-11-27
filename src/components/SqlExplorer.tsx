@@ -235,7 +235,8 @@ export default function SqlExplorer() {
                     displayedRows.map((row, rIdx) => (
                       <tr key={rIdx}>
                         {row.map((cell, cIdx) => {
-                          const isYt = cIdx === ytColIdx && typeof cell === 'string' && cell.length > 0;
+                          const isYt =
+                            cIdx === ytColIdx && typeof cell === 'string' && cell.length > 0;
                           return (
                             <td key={cIdx}>
                               {isYt ? (

@@ -28,10 +28,7 @@ let db: Database | null = null;
 async function initDatabase(dbUrl: string, wasmUrl: string): Promise<void> {
   if (db) return;
 
-  const [{ default: initSqlJs }, dbResponse] = await Promise.all([
-    import('sql.js'),
-    fetch(dbUrl),
-  ]);
+  const [{ default: initSqlJs }, dbResponse] = await Promise.all([import('sql.js'), fetch(dbUrl)]);
 
   if (!dbResponse.ok) {
     throw new Error(`Failed to fetch ${dbUrl} (HTTP ${dbResponse.status})`);
