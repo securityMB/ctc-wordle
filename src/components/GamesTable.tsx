@@ -95,12 +95,40 @@ function loadYtIframeApi(): Promise<void> {
   return ytApiPromise;
 }
 
+interface ScoredGuess {
+  word: string;
+  colors: TileState[];
+}
+
+interface PreparedGame extends Game {
+  solved: boolean;
+  upperWord: string;
+  scoredGuesses: ScoredGuess[];
+}
+
+function prepareGames(games: Game[]): PreparedGame[] {
+  return games.map((g) => {
+    const upperWord = (g.correctWord || '').toUpperCase();
+    const rawGuesses = Array.isArray(g.guesses) ? g.guesses : [];
+    const scoredGuesses: ScoredGuess[] = rawGuesses.map((raw) => {
+      const word = (raw || '').toUpperCase();
+      return { word, colors: scoreGuess(word, upperWord) };
+    });
+    return {
+      ...g,
+      solved: isSolved(g),
+      upperWord,
+      scoredGuesses,
+    };
+  });
+}
+
 export default function GamesTable({
   initialGames = [],
   initialTotal = 0,
   initialMonths = [],
 }: GamesTableProps) {
-  const [allGames, setAllGames] = useState<Game[]>(initialGames);
+  const [allGames, setAllGames] = useState<PreparedGame[]>(() => prepareGames(initialGames));
   const [hasFullData, setHasFullData] = useState(false);
   const [loadError, setLoadError] = useState('');
 
@@ -240,7 +268,7 @@ export default function GamesTable({
       })
       .then((data: unknown) => {
         if (!active) return;
-        setAllGames(Array.isArray(data) ? (data as Game[]) : []);
+        setAllGames(prepareGames(Array.isArray(data) ? (data as Game[]) : []));
         setHasFullData(true);
       })
       .catch((err: unknown) => {
@@ -264,7 +292,7 @@ export default function GamesTable({
   const { filtered, filterMs } = useMemo(() => {
     const t0 = performance.now();
     const q = debouncedSearch.trim().toUpperCase();
-    const out: Game[] = [];
+    const out: PreparedGame[] = [];
 
     for (const g of allGames) {
       if (month !== 'all' && (!g.date || !g.date.startsWith(month))) continue;
@@ -273,18 +301,16 @@ export default function GamesTable({
       if (toDate && g.date > toDate) continue;
 
       if (attempts !== 'all') {
-        const solved = isSolved(g);
         if (attempts === 'X') {
-          if (solved) continue;
-        } else if (!solved || String(g.guesses.length) !== attempts) {
+          if (g.solved) continue;
+        } else if (!g.solved || String(g.guesses.length) !== attempts) {
           continue;
         }
       }
 
       if (q) {
-        const solMatch = (g.correctWord || '').toUpperCase().includes(q);
-        const guessMatch =
-          Array.isArray(g.guesses) && g.guesses.some((w) => (w || '').toUpperCase().includes(q));
+        const solMatch = g.upperWord.includes(q);
+        const guessMatch = g.scoredGuesses.some((sg) => sg.word.includes(q));
         if (!solMatch && !guessMatch) continue;
       }
 
@@ -317,7 +343,60 @@ export default function GamesTable({
   const safePage = Math.min(page, totalPages);
   const startIdx = (safePage - 1) * PAGE_SIZE;
   const endIdx = Math.min(startIdx + PAGE_SIZE, filtered.length);
-  const pageGames = filtered.slice(startIdx, endIdx);
+  const pageGames = useMemo(() => filtered.slice(startIdx, endIdx), [filtered, startIdx, endIdx]);
+
+  const tableRows = useMemo(
+    () =>
+      pageGames.map((g) => (
+        <tr key={g.youtubeId || g.date}>
+          <td class="col-date">{g.date || '—'}</td>
+          <td class="col-solution">{g.upperWord}</td>
+          <td class="col-guesses">
+            <div class="guesses-list">
+              {g.scoredGuesses.map((sg, idx) => (
+                <span key={idx} class="guess-word" title={sg.word}>
+                  {Array.from(sg.word).map((ch, k) => (
+                    <span key={k} class={`mini-tile ${sg.colors[k]}`}>
+                      {ch}
+                    </span>
+                  ))}
+                </span>
+              ))}
+            </div>
+          </td>
+          <td>
+            <span class={`score-badge ${g.solved ? 'win' : 'fail'}`}>
+              {g.solved ? `${g.guesses.length}/6` : 'X/6'}
+            </span>
+          </td>
+          <td class="col-time">
+            {typeof g.solveTimeSeconds === 'number' && Number.isFinite(g.solveTimeSeconds)
+              ? `${g.solveTimeSeconds.toFixed(1)}s`
+              : '—'}
+          </td>
+          <td>
+            {g.youtubeId ? (
+              <a
+                class="video-link"
+                href={`https://youtu.be/${encodeURIComponent(g.youtubeId)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                  e.preventDefault();
+                  setActiveVideo(g);
+                }}
+              >
+                ▶ Watch
+              </a>
+            ) : (
+              '—'
+            )}
+          </td>
+        </tr>
+      )),
+    [pageGames]
+  );
 
   function resetFilters() {
     setSearch('');
@@ -479,7 +558,7 @@ export default function GamesTable({
           </button>
         </div>
 
-        <div class="results-meta">
+        <div class="results-meta" aria-live="polite">
           <span>{summaryText}</span>
           <span>{hasFullData && !loadError ? `${filterMs} ms` : ''}</span>
         </div>
@@ -490,12 +569,12 @@ export default function GamesTable({
           <table class="games-table">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Solution</th>
-                <th>Mark's Guesses</th>
-                <th>Score</th>
-                <th>Time</th>
-                <th>Video</th>
+                <th scope="col">Date</th>
+                <th scope="col">Solution</th>
+                <th scope="col">Mark's Guesses</th>
+                <th scope="col">Score</th>
+                <th scope="col">Time</th>
+                <th scope="col">Video</th>
               </tr>
             </thead>
             <tbody>
@@ -512,61 +591,7 @@ export default function GamesTable({
                   </td>
                 </tr>
               ) : (
-                pageGames.map((g) => {
-                  const solved = isSolved(g);
-                  return (
-                    <tr key={g.youtubeId || g.date}>
-                      <td class="col-date">{g.date || '—'}</td>
-                      <td class="col-solution">{(g.correctWord || '').toUpperCase()}</td>
-                      <td class="col-guesses">
-                        <div class="guesses-list">
-                          {(g.guesses || []).map((rawWord, idx) => {
-                            const word = (rawWord || '').toUpperCase();
-                            const colors = scoreGuess(word, g.correctWord || '');
-                            return (
-                              <span key={idx} class="guess-word" title={word}>
-                                {Array.from(word).map((ch, k) => (
-                                  <span key={k} class={`mini-tile ${colors[k]}`}>
-                                    {ch}
-                                  </span>
-                                ))}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      </td>
-                      <td>
-                        <span class={`score-badge ${solved ? 'win' : 'fail'}`}>
-                          {solved ? `${g.guesses.length}/6` : 'X/6'}
-                        </span>
-                      </td>
-                      <td class="col-time">
-                        {typeof g.solveTimeSeconds === 'number' && Number.isFinite(g.solveTimeSeconds)
-                          ? `${g.solveTimeSeconds.toFixed(1)}s`
-                          : '—'}
-                      </td>
-                      <td>
-                        {g.youtubeId ? (
-                          <a
-                            class="video-link"
-                            href={`https://youtu.be/${encodeURIComponent(g.youtubeId)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => {
-                              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-                              e.preventDefault();
-                              setActiveVideo(g);
-                            }}
-                          >
-                            ▶ Watch
-                          </a>
-                        ) : (
-                          '—'
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
+                tableRows
               )}
             </tbody>
           </table>

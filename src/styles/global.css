@@ -1,5 +1,6 @@
 /* Light & Dark Theme Tokens — inspired by bugs-chromium.bentkowski.info */
 :root {
+  color-scheme: light;
   --bg-backdrop: #cbd5e1;       /* slate-300 */
   --bg-sheet: #ffffff;          /* white */
   --bg-surface: #f1f5f9;        /* slate-100 */
@@ -27,6 +28,7 @@
 }
 
 [data-theme='dark'] {
+  color-scheme: dark;
   --bg-backdrop: #334155;       /* slate-700 */
   --bg-sheet: #111827;          /* gray-900 */
   --bg-surface: #1e293b;        /* slate-800 */

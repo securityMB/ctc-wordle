@@ -1,35 +1,14 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
+import type { RawGame } from '../lib/games.ts';
 
-interface RawGame {
-  youtubeId: string;
-  date: string;
-  correctWord: string;
-  guesses: string[];
-  solveTimeSeconds?: number | null;
-}
-
-const dataDir = path.join(process.cwd(), 'data');
-let games: RawGame[] = [];
-
-if (fs.existsSync(dataDir)) {
-  const files = fs
-    .readdirSync(dataDir)
-    .filter((f) => /^20.*\.json$/.test(f))
-    .sort();
-
-  for (const file of files) {
-    const raw = fs.readFileSync(path.join(dataDir, file), 'utf-8');
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      games.push(...parsed);
-    }
-  }
+interface Props {
+  games: RawGame[];
 }
 
 // Sort chronologically ascending for streak calculation
-games.sort((a, b) => a.date.localeCompare(b.date) || a.youtubeId.localeCompare(b.youtubeId));
+const games = [...Astro.props.games].sort(
+  (a, b) => a.date.localeCompare(b.date) || a.youtubeId.localeCompare(b.youtubeId)
+);
 
 function isWin(g: RawGame): boolean {
   if (!Array.isArray(g.guesses) || g.guesses.length === 0 || g.guesses.length > 6) return false;

@@ -1,4 +1,5 @@
-import type { Database, QueryExecResult } from 'sql.js';
+import type { QueryExecResult } from 'sql.js';
+import type { WorkerResponse } from './sqlWorker.ts';
 
 export interface SqlPreset {
   id: string;
@@ -87,38 +88,71 @@ LIMIT 25;`,
   },
 ];
 
-let dbPromise: Promise<Database> | null = null;
+interface PendingRequest {
+  resolve: (res: WorkerResponse) => void;
+  reject: (err: Error) => void;
+}
 
-/**
- * Lazily loads sql.js, the WASM binary, and /data/wordle.sqlite once on demand.
- */
-export async function getDatabase(): Promise<Database> {
-  if (!dbPromise) {
-    dbPromise = (async () => {
-      const [{ default: initSqlJs }, dbResponse] = await Promise.all([
-        import('sql.js'),
-        fetch(`/data/wordle.sqlite?v=${__BUILD_ID__}`),
-      ]);
+let worker: Worker | null = null;
+let initPromise: Promise<void> | null = null;
+let nextRequestId = 1;
+const pending = new Map<number, PendingRequest>();
 
-      if (!dbResponse.ok) {
-        throw new Error(`Failed to fetch /data/wordle.sqlite (HTTP ${dbResponse.status})`);
+function getWorker(): Worker {
+  if (!worker) {
+    worker = new Worker(new URL('./sqlWorker.ts', import.meta.url), { type: 'module' });
+    worker.addEventListener('message', (event: MessageEvent<WorkerResponse>) => {
+      const msg = event.data;
+      const entry = pending.get(msg.id);
+      if (!entry) return;
+      pending.delete(msg.id);
+      if (msg.ok) {
+        entry.resolve(msg);
+      } else {
+        entry.reject(new Error(msg.error ?? 'Unknown SQLite worker error'));
       }
-
-      const [SQL, dbBuffer] = await Promise.all([
-        initSqlJs({
-          locateFile: () => `/data/sql-wasm.wasm?v=${__BUILD_ID__}`,
-        }),
-        dbResponse.arrayBuffer(),
-      ]);
-
-      return new SQL.Database(new Uint8Array(dbBuffer));
-    })().catch((err) => {
-      dbPromise = null;
-      throw err;
+    });
+    worker.addEventListener('error', (event) => {
+      const err = new Error(event.message || 'SQLite worker error');
+      for (const entry of pending.values()) {
+        entry.reject(err);
+      }
+      pending.clear();
+      worker?.terminate();
+      worker = null;
+      initPromise = null;
     });
   }
+  return worker;
+}
 
-  return dbPromise;
+function sendWorkerRequest(payload: Record<string, unknown>): Promise<WorkerResponse> {
+  const id = nextRequestId++;
+  const w = getWorker();
+  return new Promise<WorkerResponse>((resolve, reject) => {
+    pending.set(id, { resolve, reject });
+    w.postMessage({ ...payload, id });
+  });
+}
+
+/**
+ * Lazily initializes the SQLite Web Worker, WASM binary, and /data/wordle.sqlite once on demand.
+ */
+export async function getDatabase(): Promise<void> {
+  if (!initPromise) {
+    initPromise = sendWorkerRequest({
+      type: 'init',
+      dbUrl: `/data/wordle.sqlite?v=${__BUILD_ID__}`,
+      wasmUrl: `/data/sql-wasm.wasm?v=${__BUILD_ID__}`,
+    })
+      .then(() => undefined)
+      .catch((err) => {
+        initPromise = null;
+        throw err;
+      });
+  }
+
+  return initPromise;
 }
 
 export interface QueryOutput {
@@ -127,9 +161,10 @@ export interface QueryOutput {
 }
 
 export async function runSqlQuery(sql: string): Promise<QueryOutput> {
-  const db = await getDatabase();
-  const start = performance.now();
-  const results = db.exec(sql);
-  const durationMs = performance.now() - start;
-  return { results, durationMs };
+  await getDatabase();
+  const res = await sendWorkerRequest({ type: 'exec', sql });
+  return {
+    results: res.results ?? [],
+    durationMs: res.durationMs ?? 0,
+  };
 }

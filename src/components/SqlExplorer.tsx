@@ -200,7 +200,9 @@ export default function SqlExplorer() {
                   <thead>
                     <tr>
                       {columns.map((col, idx) => (
-                        <th key={idx}>{col}</th>
+                        <th key={idx} scope="col">
+                          {col}
+                        </th>
                       ))}
                     </tr>
                   </thead>

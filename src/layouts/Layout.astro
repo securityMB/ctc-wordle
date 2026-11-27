@@ -13,6 +13,7 @@ const {
 
 const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const isSqlPage = pathname === '/sql-explorer';
+const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : Astro.url.href;
 ---
 
 <!doctype html>
@@ -21,6 +22,15 @@ const isSqlPage = pathname === '/sql-explorer';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:site_name" content="CTC Wordle Archive" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -46,7 +56,7 @@ const isSqlPage = pathname === '/sql-explorer';
     <div class="page-sheet">
       <header class="site-header">
         <div class="hero-block">
-          <a href="/" class="brand-link" tabindex="-1">
+          <a href="/" class="brand-link">
             <div class="brand-tiles" aria-hidden="true">
               <span class="brand-tile green">C</span>
               <span class="brand-tile yellow">T</span>
@@ -71,7 +81,13 @@ const isSqlPage = pathname === '/sql-explorer';
               </a>
             </li>
             <li>
-              <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme">
+              <button
+                type="button"
+                class="theme-toggle"
+                id="theme-toggle"
+                aria-label="Toggle color theme"
+                aria-pressed="false"
+              >
                 <span id="theme-icon" aria-hidden="true">◐</span>
                 <span id="theme-label">Dark</span>
               </button>
@@ -110,7 +126,10 @@ const isSqlPage = pathname === '/sql-explorer';
 
       function syncLabel(): void {
         const current = document.documentElement.getAttribute('data-theme') || 'light';
-        if (label) label.textContent = current === 'dark' ? 'Light' : 'Dark';
+        const isDark = current === 'dark';
+        if (label) label.textContent = isDark ? 'Light' : 'Dark';
+        btn?.setAttribute('aria-pressed', String(isDark));
+        btn?.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
       }
 
       syncLabel();

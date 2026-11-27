@@ -3,6 +3,9 @@ import Layout from '../layouts/Layout.astro';
 import SqlExplorer from '../components/SqlExplorer.tsx';
 ---
 
-<Layout title="SQL Explorer — CTC Wordle Archive">
+<Layout
+  title="SQL Explorer — CTC Wordle Archive"
+  description="Query the complete Cracking The Cryptic Wordle archive directly in your browser using SQLite, or download wordle.sqlite."
+>
   <SqlExplorer client:load />
 </Layout>
