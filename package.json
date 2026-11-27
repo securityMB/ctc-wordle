@@ -7,7 +7,9 @@
     "dev": "astro dev",
     "prebuild": "node scripts/prebuild.ts",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run"
   },
   "dependencies": {
     "@astrojs/preact": "^6.1.6",
@@ -19,6 +21,8 @@
     "@astrojs/check": "^0.9.12",
     "@types/node": "^26.6.11",
     "@types/sql.js": "^1.16.1",
-    "typescript": "^6.0.3"
+    "happy-dom": "^21.0.4",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.2"
   }
 }

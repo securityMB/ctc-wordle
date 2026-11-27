@@ -19,7 +19,7 @@ type SortKey = 'newest' | 'oldest' | 'fastest' | 'slowest';
 
 const PAGE_SIZE = 50;
 
-function isSolved(game: Game): boolean {
+export function isSolved(game: Game): boolean {
   if (!Array.isArray(game.guesses) || game.guesses.length === 0 || game.guesses.length > 6) {
     return false;
   }
@@ -27,7 +27,7 @@ function isSolved(game: Game): boolean {
   return last.toUpperCase() === (game.correctWord ?? '').toUpperCase();
 }
 
-function scoreGuess(guess: string, target: string): TileState[] {
+export function scoreGuess(guess: string, target: string): TileState[] {
   const g = (guess || '').toUpperCase();
   const t = (target || '').toUpperCase();
   const result = new Array<TileState>(g.length).fill('absent');
