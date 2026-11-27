@@ -1,10 +1,12 @@
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import { defineConfig } from 'astro/config';
 import preact from '@astrojs/preact';
 
-const { version: sqlJsVersion } = JSON.parse(
-  fs.readFileSync(new URL('./node_modules/sql.js/package.json', import.meta.url), 'utf8')
+const wasmBytes = fs.readFileSync(
+  new URL('./node_modules/sql.js/dist/sql-wasm.wasm', import.meta.url)
 );
+const sqlWasmHash = createHash('sha256').update(wasmBytes).digest('hex');
 const buildId = Date.now().toString(36);
 
 export default defineConfig({
@@ -14,7 +16,7 @@ export default defineConfig({
   vite: {
     define: {
       __BUILD_ID__: JSON.stringify(buildId),
-      __SQL_JS_VERSION__: JSON.stringify(sqlJsVersion),
+      __SQL_WASM_HASH__: JSON.stringify(sqlWasmHash),
     },
   },
 });

@@ -1,6 +1,6 @@
 /// <reference types="astro/client" />
 declare const __BUILD_ID__: string;
-declare const __SQL_JS_VERSION__: string;
+declare const __SQL_WASM_HASH__: string;
 
 interface YtPlayer {
   playVideo(): void;

@@ -143,7 +143,7 @@ export async function getDatabase(): Promise<void> {
     initPromise = sendWorkerRequest({
       type: 'init',
       dbUrl: `/data/wordle.sqlite?v=${__BUILD_ID__}`,
-      wasmUrl: `/data/sql-wasm.wasm?v=${__SQL_JS_VERSION__}`,
+      wasmUrl: `/data/sql-wasm.wasm?v=${__SQL_WASM_HASH__}`,
     })
       .then(() => undefined)
       .catch((err) => {
