@@ -180,8 +180,18 @@ export default function GamesTable({
       : `Showing ${(startIdx + 1).toLocaleString('en-US')}–${endIdx.toLocaleString('en-US')} of ${displayTotal.toLocaleString('en-US')} games`;
 
   return (
-    <section aria-label="Wordle games archive">
-      <div class="controls-card">
+    <section aria-label="Wordle games archive" class="archive-section">
+      <div class="section-heading-row">
+        <h2 class="section-heading">
+          Solves{' '}
+          <a href="/data/games.min.json" target="_blank" rel="noopener noreferrer" class="section-json-link">
+            .json
+          </a>
+        </h2>
+      </div>
+
+      <fieldset class="options-fieldset">
+        <legend class="options-legend">Options</legend>
         <div class="filters-grid">
           <div class="filter-field">
             <label for="filter-search">Word Search</label>
@@ -296,7 +306,7 @@ export default function GamesTable({
           <span>{summaryText}</span>
           <span>{hasFullData && !loadError ? `${filterMs} ms` : ''}</span>
         </div>
-      </div>
+      </fieldset>
 
       <div class="table-card">
         <div class="table-scroll">

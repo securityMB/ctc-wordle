@@ -3,6 +3,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import initSqlJs from 'sql.js';
 
+interface GameRecord {
+  youtubeId: string;
+  date: string;
+  correctWord: string;
+  guesses: string[];
+  solveTimeSeconds: number | null;
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 const dataDir = path.join(rootDir, 'data');
@@ -16,28 +24,31 @@ const files = fs
   .filter((f) => /^20.*\.json$/.test(f))
   .sort();
 
-const games = [];
+const games: GameRecord[] = [];
 for (const file of files) {
   const raw = fs.readFileSync(path.join(dataDir, file), 'utf8');
-  const parsed = JSON.parse(raw);
+  const parsed: unknown = JSON.parse(raw);
   if (!Array.isArray(parsed)) continue;
-  for (const g of parsed) {
+  for (const item of parsed) {
+    const g = item as Partial<GameRecord>;
     games.push({
-      youtubeId: g.youtubeId,
-      date: g.date,
-      correctWord: g.correctWord,
-      guesses: Array.isArray(g.guesses) ? g.guesses : [],
+      youtubeId: String(g.youtubeId ?? ''),
+      date: String(g.date ?? ''),
+      correctWord: String(g.correctWord ?? ''),
+      guesses: Array.isArray(g.guesses) ? g.guesses.map(String) : [],
       solveTimeSeconds:
-        typeof g.solveTimeSeconds === 'number' ? g.solveTimeSeconds : null,
+        typeof g.solveTimeSeconds === 'number' && Number.isFinite(g.solveTimeSeconds)
+          ? g.solveTimeSeconds
+          : null,
     });
   }
 }
 
 // Sort newest-first, deterministic tie-breaker on youtubeId
 games.sort((a, b) => {
-  const dateCmp = (b.date || '').localeCompare(a.date || '');
+  const dateCmp = b.date.localeCompare(a.date);
   if (dateCmp !== 0) return dateCmp;
-  return (a.youtubeId || '').localeCompare(b.youtubeId || '');
+  return a.youtubeId.localeCompare(b.youtubeId);
 });
 
 // 2. Write compact public/data/games.min.json
@@ -45,13 +56,7 @@ const minJsonPath = path.join(outDir, 'games.min.json');
 fs.writeFileSync(minJsonPath, JSON.stringify(games));
 
 // 3. Build public/data/wordle.db via sql.js
-const wasmSrc = path.join(
-  rootDir,
-  'node_modules',
-  'sql.js',
-  'dist',
-  'sql-wasm.wasm'
-);
+const wasmSrc = path.join(rootDir, 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm');
 const wasmDst = path.join(outDir, 'sql-wasm.wasm');
 fs.copyFileSync(wasmSrc, wasmDst);
 
@@ -87,9 +92,7 @@ const insertGuess = db.prepare(
 
 for (const g of games) {
   const solved =
-    g.guesses.length > 0 && g.guesses[g.guesses.length - 1] === g.correctWord
-      ? 1
-      : 0;
+    g.guesses.length > 0 && g.guesses[g.guesses.length - 1] === g.correctWord ? 1 : 0;
   const attempts = g.guesses.length;
   insertGame.run([
     g.youtubeId,

@@ -22,6 +22,18 @@ ORDER BY uses DESC
 LIMIT 25;`,
   },
   {
+    id: 'top-guesses',
+    label: 'Most guessed words',
+    sql: `SELECT word,
+       COUNT(*) AS uses,
+       COUNT(DISTINCT youtube_id) AS games,
+       ROUND(AVG(row_num), 2) AS avg_row
+FROM guesses
+GROUP BY word
+ORDER BY uses DESC
+LIMIT 25;`,
+  },
+  {
     id: 'hardest-words',
     label: 'Hardest words',
     sql: `SELECT date,

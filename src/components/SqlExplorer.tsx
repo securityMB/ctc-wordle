@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
-import { getDatabase, runSqlQuery, SQL_PRESETS, type SqlQueryResult } from '../scripts/sqlExplorer';
+import { getDatabase, runSqlQuery, SQL_PRESETS, type QueryOutput } from '../scripts/sqlExplorer';
 
 const MAX_DISPLAY_ROWS = 500;
 
@@ -14,7 +14,7 @@ export default function SqlExplorer() {
   const [sql, setSql] = useState(SQL_PRESETS[0].sql);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState('');
-  const [result, setResult] = useState<SqlQueryResult | null>(null);
+  const [output, setOutput] = useState<QueryOutput | null>(null);
 
   const initializedRef = useRef(false);
   const initializingRef = useRef(false);
@@ -30,12 +30,12 @@ export default function SqlExplorer() {
     setRunning(true);
     try {
       const res = await runSqlQuery(trimmed);
-      setResult(res);
+      setOutput(res);
       setStatus({ state: 'ready', text: 'SQLite WASM ready' });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg);
-      setResult(null);
+      setOutput(null);
     } finally {
       setRunning(false);
     }
@@ -61,23 +61,14 @@ export default function SqlExplorer() {
   }, [execute, sql]);
 
   useEffect(() => {
-    const onActivate = () => {
-      void activate();
-    };
-    window.addEventListener('sql-explorer:activate', onActivate);
-
-    const panel = document.getElementById('panel-sql');
-    if (panel && !panel.hidden) {
-      void activate();
-    }
-
-    return () => {
-      window.removeEventListener('sql-explorer:activate', onActivate);
-    };
+    void activate();
   }, [activate]);
 
-  const ytColIdx = result ? result.columns.findIndex((c) => c === 'youtube_id') : -1;
-  const displayedRows = result ? result.rows.slice(0, MAX_DISPLAY_ROWS) : [];
+  const firstSet = output?.results?.[0];
+  const columns = firstSet?.columns ?? [];
+  const rows = firstSet?.values ?? [];
+  const ytColIdx = columns.findIndex((c) => c === 'youtube_id');
+  const displayedRows = rows.slice(0, MAX_DISPLAY_ROWS);
 
   return (
     <section class="sql-explorer" aria-label="SQL Explorer">
@@ -174,7 +165,7 @@ export default function SqlExplorer() {
                 setSql('');
                 setActivePreset('');
                 setError('');
-                setResult(null);
+                setOutput(null);
               }}
             >
               Clear
@@ -188,36 +179,36 @@ export default function SqlExplorer() {
           </div>
         )}
 
-        {result && (
+        {output && (
           <>
             <div class="sql-results-meta">
               <span>
-                {result.rows.length > MAX_DISPLAY_ROWS
-                  ? `Showing first ${MAX_DISPLAY_ROWS} of ${result.rows.length} rows`
-                  : `${result.rows.length} row${result.rows.length === 1 ? '' : 's'}`}
+                {rows.length > MAX_DISPLAY_ROWS
+                  ? `Showing first ${MAX_DISPLAY_ROWS} of ${rows.length} rows`
+                  : `${rows.length} row${rows.length === 1 ? '' : 's'}`}
               </span>
-              <span>{result.durationMs.toFixed(1)} ms</span>
+              <span>{output.durationMs.toFixed(1)} ms</span>
             </div>
 
             <div class="sql-results-wrap">
               <table class="sql-table">
-                {result.columns.length > 0 && (
+                {columns.length > 0 && (
                   <thead>
                     <tr>
-                      {result.columns.map((col, idx) => (
+                      {columns.map((col, idx) => (
                         <th key={idx}>{col}</th>
                       ))}
                     </tr>
                   </thead>
                 )}
                 <tbody>
-                  {result.columns.length === 0 ? (
+                  {columns.length === 0 ? (
                     <tr>
                       <td class="sql-empty">Query executed successfully (no rows returned).</td>
                     </tr>
                   ) : displayedRows.length === 0 ? (
                     <tr>
-                      <td class="sql-empty" colSpan={result.columns.length}>
+                      <td class="sql-empty" colSpan={columns.length}>
                         0 rows returned.
                       </td>
                     </tr>

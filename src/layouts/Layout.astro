@@ -10,6 +10,9 @@ const {
   title = 'CTC Wordle Archive — Wordle in a Minute',
   description = 'Complete searchable archive of Cracking The Cryptic Wordle in a Minute solves with stats, colored guess tiles, solve times, and SQL explorer.',
 } = Astro.props;
+
+const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isSqlPage = pathname === '/sql-explorer';
 ---
 
 <!doctype html>
@@ -19,6 +22,12 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+    />
     <script>
       try {
         const saved = localStorage.getItem('ctc-wordle-theme');
@@ -33,55 +42,64 @@ const {
     </script>
   </head>
   <body>
-    <header class="site-header">
-      <div class="container header-inner">
-        <a href="/" class="brand">
-          <span class="brand-tiles" aria-hidden="true">
-            <span class="brand-tile green">C</span>
-            <span class="brand-tile yellow">T</span>
-            <span class="brand-tile green">C</span>
-          </span>
-          <div>
-            <h1 class="brand-title">Wordle Archive</h1>
-            <div class="brand-subtitle">Wordle in a Minute</div>
-          </div>
-        </a>
-
-        <div class="header-actions">
-          <nav class="nav-tabs" role="tablist" aria-label="Main views">
-            <button
-              type="button"
-              class="nav-tab active"
-              id="tab-archive"
-              role="tab"
-              aria-selected="true"
-              aria-controls="panel-archive"
-            >
-              Games Archive
-            </button>
-            <button
-              type="button"
-              class="nav-tab"
-              id="tab-sql"
-              role="tab"
-              aria-selected="false"
-              aria-controls="panel-sql"
-            >
-              SQL Explorer
-            </button>
-          </nav>
-
-          <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme">
-            <span id="theme-icon">◐</span>
-            <span id="theme-label">Theme</span>
-          </button>
+    <div class="page-sheet">
+      <header class="site-header">
+        <div class="hero-block">
+          <a href="/" class="brand-link" tabindex="-1">
+            <div class="brand-tiles" aria-hidden="true">
+              <span class="brand-tile green">C</span>
+              <span class="brand-tile yellow">T</span>
+              <span class="brand-tile green">C</span>
+            </div>
+            <h1 class="brand-title">CTC Wordle Archive</h1>
+          </a>
         </div>
-      </div>
-    </header>
 
-    <main class="container main-content">
-      <slot />
-    </main>
+        <nav class="site-nav" aria-label="Main navigation">
+          <ul class="nav-list">
+            <li class="nav-tabs-group">
+              <a href="/" class={`nav-link${!isSqlPage ? ' active' : ''}`} aria-current={!isSqlPage ? 'page' : undefined}>
+                Archive
+              </a>
+              <a
+                href="/sql-explorer"
+                class={`nav-link${isSqlPage ? ' active' : ''}`}
+                aria-current={isSqlPage ? 'page' : undefined}
+              >
+                SQL Explorer
+              </a>
+            </li>
+            <li>
+              <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle color theme">
+                <span id="theme-icon" aria-hidden="true">◐</span>
+                <span id="theme-label">Dark</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+
+        <section class="intro-prose">
+          <p>
+            Every <strong>Wordle in a Minute</strong> solve from{' '}
+            <a href="https://www.youtube.com/@CrackingTheCryptic" target="_blank" rel="noopener noreferrer">
+              Cracking The Cryptic
+            </a>{' '}
+            with full guess boards, solve times, and a browser-based SQLite explorer.
+          </p>
+          <p class="intro-disclaimer">
+            This is a fan-made project and is not affiliated with Cracking The Cryptic. Source code on{' '}
+            <a href="https://github.com/securityMB/ctc-wordle" target="_blank" rel="noopener noreferrer">
+              GitHub
+            </a>
+            .
+          </p>
+        </section>
+      </header>
+
+      <main class="main-content">
+        <slot />
+      </main>
+    </div>
 
     <script>
       const btn = document.getElementById('theme-toggle');
