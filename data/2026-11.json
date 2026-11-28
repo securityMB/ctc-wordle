@@ -312,5 +312,17 @@
       "TENSE"
     ],
     "solveTimeSeconds": 108.31
+  },
+  {
+    "youtubeId": "II9sZI9J8ow",
+    "date": "2026-11-27",
+    "correctWord": "SHEAF",
+    "guesses": [
+      "MEETS",
+      "SWEAR",
+      "SPEAK",
+      "SHEAF"
+    ],
+    "solveTimeSeconds": 52.5
   }
 ]
